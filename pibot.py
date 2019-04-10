@@ -17,6 +17,7 @@ from gpiozero import DigitalOutputDevice
 from time import sleep
 import RPi.GPIO as GPIO
 import time
+
 #GPIO Mode (BOARD / BCM)
 GPIO.setmode(GPIO.BCM)
  
@@ -89,16 +90,16 @@ def forwardDrive():
     reverseLeft.value = False
     forwardRight.value = True
     reverseRight.value = False
-    driveLeft.value = 1.0
-    driveRight.value = 1.0
+    driveLeft.value = 0.1
+    driveRight.value = 0.1
 
 def reverseDrive():
     forwardLeft.value = False
     reverseLeft.value = True
     forwardRight.value = False
     reverseRight.value = True
-    driveLeft.value = 1.0
-    driveRight.value = 1.0
+    driveLeft.value = 0.5
+    driveRight.value = 0.5
 
 def spinLeft():
     forwardLeft.value = False
@@ -113,8 +114,8 @@ def SpinRight():
     reverseLeft.value = False
     forwardRight.value = False
     reverseRight.value = True
-    driveLeft.value = 1.0
-    driveRight.value = 1.0
+    driveLeft.value = 0.25
+    driveRight.value = 0.25
 
 def forwardTurnLeft():
     forwardLeft.value = True
@@ -148,10 +149,23 @@ def reverseTurnRight():
     driveLeft.value = 0.8
     driveRight.value = 0.2
 
-def main():
-    forwardDrive()
 
-
-if __name__ == "__main__":
-    """ This is executed when run from the command line """
-    main()
+if __name__ == '__main__':
+    try:
+        while True:
+            dist = distance()
+            if dist > 40:
+                forwardDrive()
+            elif dist < 40 or dist > 3000:
+                allStop()
+                time.sleep(1)
+                reverseDrive() 
+                time.sleep(0.5)
+                allStop()
+            print ("Measured Distance = %.1f cm" % dist)
+            time.sleep(1)
+ 
+        # Reset by pressing CTRL + C
+    except KeyboardInterrupt:
+        print("Measurement stopped by User")
+        GPIO.cleanup()
